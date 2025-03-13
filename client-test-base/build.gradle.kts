@@ -1,6 +1,7 @@
 plugins {
     alias(libs.plugins.android.library)
     alias(libs.plugins.kotlin.android)
+    alias(libs.plugins.compose.compiler)
     id("maven-publish")
 }
 
@@ -25,6 +26,7 @@ android {
         }
     }
     compileOptions {
+        isCoreLibraryDesugaringEnabled = true
         sourceCompatibility = Constants.sourceCompatibilityVersion
         targetCompatibility = Constants.targetCompatibilityVersion
     }
@@ -34,9 +36,6 @@ android {
     buildFeatures {
         compose = true
         buildConfig = true
-    }
-    composeOptions {
-        kotlinCompilerExtensionVersion = Constants.kotlinCompilerExtVersion
     }
 }
 
@@ -51,6 +50,8 @@ dependencies {
     implementation(libs.junit)
     implementation(libs.koin.test)
     implementation(libs.org.robolectric)
+
+    coreLibraryDesugaring(libs.desugar.jdk.libs)
 }
 
 publishing {

@@ -1,6 +1,5 @@
 import com.android.build.gradle.tasks.SourceJarTask
 import com.strumenta.antlrkotlin.gradle.AntlrKotlinTask
-import org.jetbrains.kotlin.gradle.dsl.KotlinCompile
 
 plugins {
     alias(libs.plugins.android.library)
@@ -8,6 +7,7 @@ plugins {
     alias(libs.plugins.roborazzi)
     alias(libs.plugins.com.strumenta.antlr.kotlin)
     alias(libs.plugins.kotlinx.serialization)
+    alias(libs.plugins.compose.compiler)
     id("maven-publish")
 }
 
@@ -49,6 +49,7 @@ android {
     }
 
     compileOptions {
+        isCoreLibraryDesugaringEnabled = true
         sourceCompatibility = Constants.sourceCompatibilityVersion
         targetCompatibility = Constants.targetCompatibilityVersion
     }
@@ -58,9 +59,6 @@ android {
     buildFeatures {
         compose = true
         buildConfig = true
-    }
-    composeOptions {
-        kotlinCompilerExtensionVersion = Constants.kotlinCompilerExtVersion
     }
     packaging {
         resources {
@@ -131,26 +129,24 @@ dependencies {
     testImplementation(libs.junit)
     testImplementation(libs.koin.test)
     testImplementation(libs.org.robolectric)
+
+    coreLibraryDesugaring(libs.desugar.jdk.libs)
 }
 
 // ./gradlew assembleRelease -PcomposeCompilerReports=true
 // Run the command above in order to generate the compose stability diagnose report.
 // https://developer.android.com/jetpack/compose/performance/stability/diagnose
-tasks.withType<org.jetbrains.kotlin.gradle.tasks.KotlinCompile>().configureEach {
-    kotlinOptions {
+tasks.withType<org.jetbrains.kotlin.gradle.tasks.KotlinCompilationTask<*>>().configureEach {
+    compilerOptions {
         val prefix = "plugin:androidx.compose.compiler.plugins.kotlin"
         val output = layout.buildDirectory.dir("compose_compiler")
         if (project.findProperty("composeCompilerReports") == "true") {
-            freeCompilerArgs += listOf(
-                "-P",
-                "$prefix:reportsDestination=$output"
-            )
+            freeCompilerArgs.add("-P")
+            freeCompilerArgs.add("$prefix:reportsDestination=$output")
         }
         if (project.findProperty("composeCompilerMetrics") == "true") {
-            freeCompilerArgs += listOf(
-                "-P",
-                "$prefix:metricsDestination=$output"
-            )
+            freeCompilerArgs.add("-P")
+            freeCompilerArgs.add("$prefix:metricsDestination=$output")
         }
     }
 }
@@ -182,10 +178,6 @@ val generateKotlinGrammarSource = tasks.register<AntlrKotlinTask>("generateKotli
     // Generated files are outputted inside build/generatedAntlr/{package-name}
     val outDir = "$antlrGeneratedDir/${pkgName.replace(".", "/")}"
     outputDirectory = layout.buildDirectory.dir(outDir).get().asFile
-}
-
-tasks.withType<KotlinCompile<*>> {
-    dependsOn(generateKotlinGrammarSource)
 }
 
 tasks.withType<SourceJarTask> {

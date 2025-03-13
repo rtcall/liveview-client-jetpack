@@ -1,6 +1,7 @@
 plugins {
     alias(libs.plugins.android.application)
     alias(libs.plugins.kotlin.android)
+    alias(libs.plugins.compose.compiler)
 }
 
 android {
@@ -25,6 +26,7 @@ android {
         }
     }
     compileOptions {
+        isCoreLibraryDesugaringEnabled = true
         sourceCompatibility = Constants.sourceCompatibilityVersion
         targetCompatibility = Constants.targetCompatibilityVersion
     }
@@ -33,9 +35,6 @@ android {
     }
     buildFeatures {
         compose = true
-    }
-    composeOptions {
-        kotlinCompilerExtensionVersion = Constants.kotlinCompilerExtVersion
     }
     namespace = "com.dockyard.android.liveviewsample"
 }
@@ -51,4 +50,5 @@ dependencies {
         isChanging = true
         exclude(group = Constants.publishGroupId, module = Constants.publishArtifactClientId)
     }
+    coreLibraryDesugaring(libs.desugar.jdk.libs)
 }

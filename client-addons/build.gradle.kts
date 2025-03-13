@@ -2,6 +2,7 @@ plugins {
     alias(libs.plugins.android.library)
     alias(libs.plugins.kotlin.android)
     alias(libs.plugins.roborazzi)
+    alias(libs.plugins.compose.compiler)
     id("maven-publish")
 }
 
@@ -28,6 +29,7 @@ android {
         }
     }
     compileOptions {
+        isCoreLibraryDesugaringEnabled = true
         sourceCompatibility = Constants.sourceCompatibilityVersion
         targetCompatibility = Constants.targetCompatibilityVersion
     }
@@ -36,9 +38,6 @@ android {
     }
     buildFeatures {
         compose = true
-    }
-    composeOptions {
-        kotlinCompilerExtensionVersion = Constants.kotlinCompilerExtVersion
     }
 
     testNamespace = "$moduleId.test"
@@ -61,6 +60,8 @@ dependencies {
     testImplementation(libs.androidx.compose.ui.test.junit4)
     testImplementation(libs.io.coil.kt.coil.test)
     testImplementation(libs.junit)
+
+    coreLibraryDesugaring(libs.desugar.jdk.libs)
 }
 
 // Configuring Java Lib Path in order to find the native library before running the Unit Tests
